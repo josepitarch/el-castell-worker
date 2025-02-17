@@ -25,13 +25,14 @@
    "r2_buckets": [
     {
       "binding": "MY_BUCKET",
-      "bucket_name": "el-castell-bucket"
+      "bucket_name": "el-castell-bucket",
+      "preview_bucket_name": "preview-el-castell-bucket"
     }
   ],
   "d1_databases": [
     {
       "binding": "MY_DATABASE",
-      "database_name": "el-castell-database",
+      "database_name": "el-castell-db",
       "database_id": "86ce23dd-d071-4f0f-aed9-398f81dc13a6"
     }
   ]
