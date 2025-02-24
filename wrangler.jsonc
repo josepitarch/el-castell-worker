@@ -22,13 +22,7 @@
    * databases, object storage, AI inference, real-time communication and more.
    * https://developers.cloudflare.com/workers/runtime-apis/bindings/
    */
-   "r2_buckets": [
-    {
-      "binding": "MY_BUCKET",
-      "bucket_name": "el-castell-bucket",
-      "preview_bucket_name": "preview-el-castell-bucket"
-    }
-  ],
+
   "d1_databases": [
     {
       "binding": "MY_DATABASE",

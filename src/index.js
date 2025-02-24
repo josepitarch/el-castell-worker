@@ -1,16 +1,11 @@
 export default {
   async fetch(request, env) {
     try {
-      const csvFileName = "el-castell-schedule.csv";
+      const formData = await request.formData();
+      const file = formData.get("file");
 
-      const object = await env.MY_BUCKET.get(csvFileName);
-      if (!object) {
-        return new Response("Archivo CSV no encontrado", { status: 404 });
-      }
-
-      const csvText = await object.text();
-
-      await save(processFile(csvText), env.MY_DATABASE);
+      const lines = file.split("\n");
+      await save(lines.slice(1), env.MY_DATABASE);
 
       return new Response("Archivo procesado correctamente", {
         headers: { "Content-Type": "text/plain" },
@@ -40,21 +35,24 @@ const processFile = (file) => {
 async function save(data, db) {
 
   const getTime = (col) => {
-    return col.split('-').map(time => time.trim())
+    return col.split('a').map(time => time.trim())
   }
 
   await clearTable(db);
 
   for (const row of data) {
-    const { SABADO, SEMANAL } = row;
-    const saturday = getTime(SABADO);
-    const weekday = getTime(SEMANAL);
+    const columns = row.split(";").filter(col => col !== "");
+    const saturday = getTime(columns[6]);
+    const weekday01 = getTime(columns[7]);
+    const weekday02 = getTime(columns[8]);
 
-    await db.prepare(
-      `INSERT INTO schedule (area, smallholding, hanegadas, community, fire_hydrant, sector, saturday_start_time, saturday_end_time, weekday_start_time, weekday_end_time) 
+    columns.forEach((col, index) => console.log(col));
+
+  await db.prepare(
+      `INSERT INTO schedule (area, smallholding, society, hg, fire_hydrant, saturday_sector, saturday_start_time, saturday_end_time, weekday_sector, weekday_start_time_1, weekday_end_time_1, weekday_start_time_2, weekday_end_time_2) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
-      row.POL, row.PARC, row.HG, row.SOCIEDAD, row.HIDRANTE, row.SECTOR, saturday.at(0), saturday.at(1), weekday.at(0), weekday.at(1)
+      columns[0], columns[1], columns[2], columns[3], columns[4], columns[5], saturday[0], saturday[1], columns[7], weekday01[0], weekday01[1], weekday02[0], weekday02[1]
     ).run();
   }
 }
