@@ -4,7 +4,7 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "el-castell-worker",
+  "name": "casmusal-worker",
   "main": "src/index.js",
   "compatibility_date": "2025-02-14",
   "observability": {
