@@ -34,6 +34,7 @@ const processFile = (file) => {
 }
 
 async function save(data, db) {
+  const schedules = []
   const EMPTY_COL = ['\r', '', '\n']
 
   const getTime = (col) => {
@@ -51,15 +52,38 @@ async function save(data, db) {
     const weekday01 = getTime(columns[8]);
     const weekday02 = getTime(columns[9]);
 
-    await db.prepare(
-      `INSERT INTO schedule (area, smallholding, society, hg, fire_hydrant, saturday_sector, saturday_start_time, saturday_end_time, weekday_sector, weekday_start_time_1, weekday_end_time_1, weekday_start_time_2, weekday_end_time_2) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      columns[0], columns[1], columns[2], columns[3], columns[4], columns[5], saturday[0], saturday[1], columns[7], weekday01[0], weekday01[1], weekday02[0], weekday02[1]
-    ).run();
+    if (schedules.some(s => s.area === columns[0] && s.smallholding === columns[1])) {
+      console.warn(`Polígono ${columns[0]} y parcela ${columns[1]} está duplicada`)
+    }
+    else {
+      schedules.push({
+        'area': columns[0],
+        'smallholding': columns[1]
+      })
+    
+      await db.prepare(
+        `INSERT INTO schedule (area, smallholding, society, hg, fire_hydrant, saturday_sector, saturday_start_time, saturday_end_time, weekday_sector, weekday_start_time_1, weekday_end_time_1, weekday_start_time_2, weekday_end_time_2) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        columns[0], columns[1], columns[2], columns[3], columns[4], columns[5], saturday[0], saturday[1], columns[7], weekday01[0], weekday01[1], weekday02[0], weekday02[1]
+      ).run();
+    }
+    
   }
 }
 
 async function clearTable(db) {
   await db.prepare("DELETE FROM schedule").run();
+}
+
+class Schedule {
+
+  constructor(area, smallholding) {
+    this.area = area
+    this.smallholding = smallholding
+  }
+
+  equals(o) {
+    return this.area === o.area && this.smallholding === o.smallholding
+  }
 }
